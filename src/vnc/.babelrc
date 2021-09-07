@@ -1,0 +1,9 @@
+{
+  "presets": [
+    [
+      "@babel/env",{
+        "modules":false //防止babel将在Rollup执行之前将模块转为cjs
+      }
+    ]
+  ]
+}

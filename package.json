@@ -1,0 +1,147 @@
+{
+  "name": "vnc-extension",
+  "displayName": "vnc-extension",
+  "description": "novnc vscode extension",
+  "version": "0.0.1",
+  "publisher": "king2021",
+  "engines": {
+    "vscode": "^1.59.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onCommand:vnc-extension.refresh",
+    "onView:vncServers",
+    "onCommand:vnc-extension.add",
+    "onCommand:vnc-extension.delete",
+    "onCommand:vnc-extension.connect",
+    "onCommand:vnc-extension.disconnected",
+    "onCommand:vnc-extension.editLabel"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "views": {
+      "vnc-explorer": [
+        {
+          "id": "vncServers",
+          "name": "VNC Server",
+          "icon": "media/vnc.svg",
+          "visibility": "collapsed",
+          "contextualTitle": "VNC SERVER EXPLORER"
+        }
+      ]
+    },
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "vnc-explorer",
+          "title": "VNC",
+          "icon": "media/vnc.svg"
+        }
+      ]
+    },
+    "menus": {
+      "view/title": [
+        {
+          "command": "vnc-extension.add",
+          "group": "navigation",
+          "when": "view == vncServers"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "vnc-extension.connect",
+          "when": "view == vncServers"
+        },
+        {
+          "command": "vnc-extension.delete",
+          "when": "view == vncServers"
+        },
+        {
+          "command": "vnc-extension.disconnected",
+          "when": "view == vncServers"
+        },
+        {
+          "command": "vnc-extension.editLabel",
+          "group": "inline",
+          "when": "view == vncServers"
+        }
+      ]
+    },
+    "viewsWelcome": [
+      {
+        "view": "vncServers",
+        "contents": "No History VNC Server Saved!\n[Add VNC Server](command:vnc-extension.add)"
+      }
+    ],
+    "commands": [
+      {
+        "command": "vnc-extension.refresh",
+        "title": "Refresh",
+        "icon": {
+          "light": "resources/light/refresh.svg",
+          "dark": "resources/dark/refresh.svg"
+        }
+      },
+      {
+        "command": "vnc-extension.add",
+        "title": "Add"
+      },
+      {
+        "command": "vnc-extension.delete",
+        "title": "Delete"
+      },
+      {
+        "command": "vnc-extension.disconnected",
+        "title": "Disconnected"
+      },
+      {
+        "command": "vnc-extension.connect",
+        "title": "Connect"
+      },
+      {
+        "command": "vnc-extension.editLabel",
+        "title": "Edit"
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "yarn run compile",
+    "compile": "tsc -p ./",
+    "compile:vnclib": "rollup -c",
+    "watch": "tsc -watch -p ./",
+    "pretest": "yarn run compile && yarn run lint",
+    "lint": "eslint src --ext ts",
+    "test": "node ./out/test/runTest.js"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.15.0",
+    "@babel/preset-env": "^7.15.0",
+    "@rollup/plugin-commonjs": "^20.0.0",
+    "@rollup/plugin-node-resolve": "^13.0.4",
+    "@types/fs-extra": "^9.0.12",
+    "@types/glob": "^7.1.3",
+    "@types/mocha": "^8.2.2",
+    "@types/node": "14.x",
+    "@types/vscode": "^1.59.0",
+    "@types/ws": "^7.4.7",
+    "@typescript-eslint/eslint-plugin": "^4.26.0",
+    "@typescript-eslint/parser": "^4.26.0",
+    "eslint": "^7.27.0",
+    "glob": "^7.1.7",
+    "mocha": "^8.4.0",
+    "rollup": "^2.56.3",
+    "rollup-plugin-babel": "^4.4.0",
+    "rollup-plugin-node-builtins": "^2.1.2",
+    "rollup-plugin-node-globals": "^1.4.0",
+    "typescript": "^4.3.2",
+    "vscode-test": "^1.5.2"
+  },
+  "dependencies": {
+    "fs-extra": "^10.0.0",
+    "novnc-node": "^0.5.3",
+    "ws": "^8.2.1"
+  },
+  "license": "MIT"
+}
