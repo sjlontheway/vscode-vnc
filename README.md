@@ -3,30 +3,34 @@ A [Visual Studio Code](https://code.visualstudio.com/) [extension](https://marke
 
 ## how to use 
 
-You can just find VNC Button from Activity bar , you can click it to switch vnc host list explorer. just click ` + ` to add vnc server host and click `enter` to confirm. then,  you can find the vnc server address in explorer tree view. select  and `right click ` select 
+You can just find VNC Button from Activity bar , you can click it to switch vnc host list explorer. just click ` + ` to add vnc server host and click `enter` to confirm. then,  you can find the vnc server address in explorer tree view. select  server to connect
 
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
+## sample
 
-For example if there is an image subfolder under your extension project workspace:
-
+![demo](./doc/vnc-use.gif)
 
 
 > Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
 
 
-## Known Issues
-
-Calling out known issues can help limit users opening duplicate issues against your extension.
 
 ## Release Notes
 
 Users appreciate release notes as you update your extension.
 
-### 1.0.0
+### 0.0.1
 
 Initial release of ...
 
 vnc extension connected to vnc server
 
+### 0.0.2
+
+fix bug
+
+
+### 0.0.3
+
+add readme
 
 
