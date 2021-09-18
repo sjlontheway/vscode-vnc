@@ -12,10 +12,7 @@
 
   const vscode = acquireVsCodeApi();
 
-  const oldState = vscode.getState();
-
   const container = /** @type {HTMLElement} */ (document.getElementById('root'));
-  console.log('Initial state', oldState);
 
   const statusEl = document.getElementById('title');
 
@@ -61,4 +58,9 @@
     statusEl.innerText = statusTitle;
 
   });
+  window.addEventListene('unload', () => {
+    if (display) {
+      display.disconnect();
+    }
+  })
 }());

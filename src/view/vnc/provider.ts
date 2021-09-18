@@ -15,7 +15,7 @@ import { inputVNCServer, editServerLabel } from '../../lib/modal';
 import { WebviewPanel, ExtensionContext } from 'vscode';
 import createChildProxy, { findLocalUnusePort } from '../../lib/proxy/forkProxy';
 import { ProxyOptions } from '../../lib/proxy/proxy';
-import { ParentMessage, ChildProcessMessage } from '../../message';
+import { ParentMessage, ChildProcessMessage, ChildProcessCode } from '../../message';
 import { ChildProcess } from 'child_process';
 
 const localPortRange = [6881, 6892];
@@ -53,14 +53,15 @@ export class Vnc extends TreeItem {
     };
     if (!this.childProcess) {
       this.childProcess = createChildProxy(options);
-      // this.childProcess?.on('message', this.handleChildProcessMsg);
-
+      this.childProcess?.on('message', this.handleChildProcessMsg);
     }
   }
 
   handleChildProcessMsg = (message: ChildProcessMessage) => {
     console.log('handle child process:', message);
-    this.sendMsgToWebview(message);
+    if (message.type === ChildProcessCode.CONNECTED) {
+      this.sendMsgToWebview(message);
+    }
   };
 
   sendMessageToChildProces = (message: ParentMessage) => {
