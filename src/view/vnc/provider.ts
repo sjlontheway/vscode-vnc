@@ -35,6 +35,7 @@ export class Vnc extends TreeItem {
   ) {
     super(label);
     this.tooltip = `${domain}:${port}`;
+    this.description = `${domain}:${port}`;
   }
 
   async startProxyServer() {
@@ -112,9 +113,9 @@ export class VncServerExplorerProvider implements TreeDataProvider<Vnc> {
         this.vncLists.push(...cacheVncLists);
       }
     } catch (error) {
-      
+
     }
-   
+
   }
 
   private _onDidChangeTreeData: EventEmitter<Vnc | undefined | null | void> =

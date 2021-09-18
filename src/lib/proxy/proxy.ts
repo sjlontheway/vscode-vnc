@@ -103,6 +103,8 @@ export default function proxyRequest(options: ProxyOptions) {
   webServer.listen(sourcePort, () => {
     wsServer = new WebSocketServer({ server: webServer });
     wsServer.on('connection', (socket: WebSocket) => socketTransform(socket, targetDomain, targetPort));
+    wsServer.on('error', e => console.log('wsserver error:', e));
+    wsServer.on('close', (...args) => console.log('close:reason', args));
     sendMsgToParentProcess({ type: ChildProcessCode.CONNECTED, wsUrl: `${wsProtol}localhost:${sourcePort}` });
   });
 }
@@ -110,9 +112,6 @@ export default function proxyRequest(options: ProxyOptions) {
 function exit() {
   process.exit();
 }
-
-const options: ProxyOptions = JSON.parse(process.env.options || '') as ProxyOptions;
-process.title = 'vnc proxy process';
 
 /**
  * 
@@ -133,6 +132,9 @@ function sendMsgToParentProcess(message: ChildProcessMessage) {
 }
 
 try {
+  const options: ProxyOptions = JSON.parse(process.env.options || '') as ProxyOptions;
+  process.title = 'vnc proxy process';
+
   proxyRequest(options);
   process.on('message', handleParentMessage);
 

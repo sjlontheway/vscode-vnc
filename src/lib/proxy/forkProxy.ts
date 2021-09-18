@@ -4,11 +4,9 @@ import { join } from 'path';
 import { createServer } from 'net';
 
 export default function createChildProxy(options: ProxyOptions) {
-  const child: ChildProcess = fork(join(__dirname, './proxy.js'), { env: { options: JSON.stringify(options) } })
+  const child: ChildProcess = fork(join(__dirname, './proxy.js'), { env: { options: JSON.stringify(options) } });
   child.stdout?.pipe(process.stdout);
   return child;
-  // proxyRequest(options);
-  // return null;
 }
 
 export async function findLocalUnusePort(port: number, maxPort: number): Promise<number> {

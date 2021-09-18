@@ -2,7 +2,7 @@
   "name": "vnc-extension",
   "displayName": "vnc-extension",
   "description": "novnc vscode extension",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "publisher": "king2021",
   "engines": {
     "vscode": "^1.59.0"
@@ -52,6 +52,7 @@
       "view/item/context": [
         {
           "command": "vnc-extension.connect",
+          "group": "inline",
           "when": "view == vncServers"
         },
         {
@@ -64,7 +65,6 @@
         },
         {
           "command": "vnc-extension.editLabel",
-          "group": "inline",
           "when": "view == vncServers"
         }
       ]
@@ -94,7 +94,7 @@
       },
       {
         "command": "vnc-extension.disconnected",
-        "title": "Disconnected"
+        "title": "Disconnect"
       },
       {
         "command": "vnc-extension.connect",
@@ -102,7 +102,7 @@
       },
       {
         "command": "vnc-extension.editLabel",
-        "title": "Edit"
+        "title": "Set Alias Name"
       }
     ]
   },
