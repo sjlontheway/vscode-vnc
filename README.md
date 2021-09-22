@@ -9,8 +9,6 @@ You can just find VNC Button from Activity bar , you can click it to switch vnc 
 
 ![demo](https://raw.githubusercontent.com/sjlontheway/vscode-vn-c/main/doc/vnc-use.gif)
 
-
-
 ## Release Notes
 
 Users appreciate release notes as you update your extension.
