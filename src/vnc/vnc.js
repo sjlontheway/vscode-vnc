@@ -13,7 +13,9 @@ const defaultOptions = {
   qualityLevel: 6,
   compressionLevel: 2,
   retry: false,
-  retryDuration: 3000
+  retryDuration: 3000,
+  onPasswordInput: prompt("Password Required:"),
+  reconnect: () => { }
 };
 
 export default class VncDisplay {
@@ -59,15 +61,23 @@ export default class VncDisplay {
     });
 
     this.rfb.addEventListener('disconnect', () => {
-      console.info(`Disconnected from remote VNC, retrying in ${retryDuration / 1000} seconds.`);
+      console.info(`Disconnected from remote VNC, retrying in ${this.options.retryDuration / 1000} seconds.`);
       if (this.options.retry) {
-        setTimeout(this.connect, this.options.retryDuration);
+        setTimeout(()=>{
+          console.info(`send reconnect message!`);
+          this.options.reconnect();
+        }, this.options.retryDuration);
       }
     });
 
-    this.rfb.addEventListener('credentialsrequired', () => {
-      const password = prompt("Password Required:");
-      this.rfb.sendCredentials({ password: password });
+    this.rfb.addEventListener('credentialsrequired', (e) => {
+      console.log('credentialsrequired:', e);
+      console.log(this.options);
+      if (this.options.onPasswordInput) {
+        this.options.onPasswordInput(this.url, "Password is needed or Password is incorrect!", (password) => {
+          this.rfb.sendCredentials({ password: password });
+        });
+      }
     });
 
     this.rfb.addEventListener('desktopname', (e) => {

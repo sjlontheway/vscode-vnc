@@ -17474,7 +17474,11 @@
     showDotCursor: true,
     background: '',
     qualityLevel: 6,
-    compressionLevel: 2
+    compressionLevel: 2,
+    retry: false,
+    retryDuration: 3000,
+    onPasswordInput: prompt("Password Required:"),
+    reconnect: function reconnect() {}
   };
 
   var VncDisplay = function VncDisplay(options, target, url) {
@@ -17499,7 +17503,9 @@
     });
 
     _defineProperty(this, "disconnect", function () {
-      if (!_this.rfb) return;
+      if (!_this.rfb) {
+        return;
+      }
 
       _this.rfb.disconnect();
 
@@ -17507,10 +17513,6 @@
     });
 
     _defineProperty(this, "registerListener", function () {
-      // if (this.container) {
-      //   this.container.addEventListener('mouseenter', this.handleMouseEnter);
-      //   this.container.addEventListener('mouseleave', this.handleMouseLeave);
-      // }
       window.addEventListener('resize', _this._onWindowResize);
 
       _this.rfb.addEventListener('connect', function () {
@@ -17518,17 +17520,28 @@
       });
 
       _this.rfb.addEventListener('disconnect', function () {
-        var retryDuration = 3000;
-        console.info("Disconnected from remote VNC, retrying in ".concat(retryDuration / 1000, " seconds."));
-        setTimeout(_this.connect, retryDuration);
+        console.info("Disconnected from remote VNC, retrying in ".concat(_this.options.retryDuration / 1000, " seconds."));
+
+        if (_this.options.retry) {
+          setTimeout(function () {
+            console.info("send reconnect message!");
+
+            _this.options.reconnect();
+          }, _this.options.retryDuration);
+        }
       });
 
-      _this.rfb.addEventListener('credentialsrequired', function () {
-        var password = prompt("Password Required:");
+      _this.rfb.addEventListener('credentialsrequired', function (e) {
+        console.log('credentialsrequired:', e);
+        console.log(_this.options);
 
-        _this.rfb.sendCredentials({
-          password: password
-        });
+        if (_this.options.onPasswordInput) {
+          _this.options.onPasswordInput(_this.url, "Password is needed or Password is incorrect!", function (password) {
+            _this.rfb.sendCredentials({
+              password: password
+            });
+          });
+        }
       });
 
       _this.rfb.addEventListener('desktopname', function (e) {
@@ -17537,39 +17550,13 @@
     });
 
     _defineProperty(this, "removeAllListerners", function () {
-      // if (this.container) {
-      //   this.container.removeEventListener('mouseenter', this.handleMouseEnter);
-      //   this.container.removeEventListener('mouseleave', this.handleMouseLeave);
-      // }
       window.removeEventListener('resize', _this._onWindowResize);
     });
 
-    _defineProperty(this, "handleClick", function () {
+    _defineProperty(this, "_onWindowResize", function (e) {
       var _this$rfb;
 
-      (_this$rfb = _this.rfb) === null || _this$rfb === void 0 ? void 0 : _this$rfb.focus();
-    });
-
-    _defineProperty(this, "handleMouseEnter", function () {
-      if (document.activeElement) {
-        var _document$activeEleme;
-
-        (_document$activeEleme = document.activeElement) === null || _document$activeEleme === void 0 ? void 0 : _document$activeEleme.blur();
-      }
-
-      _this.handleClick();
-    });
-
-    _defineProperty(this, "handleMouseLeave", function () {
-      var _this$rfb2;
-
-      (_this$rfb2 = _this.rfb) === null || _this$rfb2 === void 0 ? void 0 : _this$rfb2.blur();
-    });
-
-    _defineProperty(this, "_onWindowResize", function (e) {
-      var _this$rfb3;
-
-      (_this$rfb3 = _this.rfb) === null || _this$rfb3 === void 0 ? void 0 : _this$rfb3._windowResize(e);
+      (_this$rfb = _this.rfb) === null || _this$rfb === void 0 ? void 0 : _this$rfb._windowResize(e);
     });
 
     _defineProperty(this, "render", function () {

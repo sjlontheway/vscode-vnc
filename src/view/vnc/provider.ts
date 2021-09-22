@@ -11,7 +11,7 @@ import {
 } from 'vscode';
 import * as Path from 'path';
 import * as fs from 'fs-extra';
-import { inputVNCServer, editServerLabel } from '../../lib/modal';
+import { inputVNCServer, editServerLabel, showVncPassWdInput } from '../../lib/modal';
 import { WebviewPanel, ExtensionContext } from 'vscode';
 import createChildProxy, { findLocalUnusePort } from '../../lib/proxy/forkProxy';
 import { ProxyOptions } from '../../lib/proxy/proxy';
@@ -78,9 +78,37 @@ export class Vnc extends TreeItem {
     }, reason => console.error(`send data: ${data.type}[${data.msg}] failed: ${reason}`));
   }
 
+  showInputPassWd(reason: string) {
+    showVncPassWdInput(`${this.domain}:${this.port}:${reason}`,).then(password => {
+      this._panel?.webview.postMessage({
+        type: ChildProcessCode.VNC_PASSWORD,
+        password
+      });
+    });
+  }
+
+  reconnectProxyServer() {
+    this.childProcess?.kill();
+    this.childProcess = null;
+    this.startProxyServer();
+  }
+
   set panel(panel: WebviewPanel | undefined) {
     this._panel = panel;
     if (this._panel) {
+      this._panel.webview.onDidReceiveMessage(data => {
+        switch (data.type) {
+          case ChildProcessCode.VNC_PASSWORD:
+            const { reason } = data;
+            this.showInputPassWd(reason);
+            break;
+
+          case ChildProcessCode.RECONNECT:
+            this.reconnectProxyServer();
+            break;
+        }
+      });
+      
       this._panel?.onDidDispose(
         () => {
           this._panel = undefined;

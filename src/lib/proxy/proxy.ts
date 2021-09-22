@@ -32,6 +32,7 @@ const errorHandler = (response: ServerResponse, code: number, msg: string) => {
 };
 
 const socketTransform = (client: WebSocket, targetAddress: string, targetPort: number) => {
+  console.log('socketTransform');
   const target = createConnection(targetPort, targetAddress, function () {
     console.log(`connected to remote host ${targetAddress}:${targetPort} target`);
   });

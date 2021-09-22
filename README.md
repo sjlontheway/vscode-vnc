@@ -7,10 +7,7 @@ You can just find VNC Button from Activity bar , you can click it to switch vnc 
 
 ## sample
 
-![demo](./doc/vnc-use.gif)
-
-
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
+![demo](https://raw.githubusercontent.com/sjlontheway/vscode-vn-c/main/doc/vnc-use.gif)
 
 
 
