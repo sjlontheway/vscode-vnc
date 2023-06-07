@@ -1,5 +1,4 @@
-
-import RFB from './core/rfb';
+import RFB from "./core/rfb";
 
 const defaultOptions = {
   viewOnly: false,
@@ -9,17 +8,16 @@ const defaultOptions = {
   resizeSession: false,
   scaleViewport: false,
   showDotCursor: true,
-  background: '',
+  background: "",
   qualityLevel: 6,
   compressionLevel: 2,
   retry: false,
   retryDuration: 3000,
-  onPasswordInput: prompt("Password Required:"),
-  reconnect: () => { }
+  // onPasswordInput: prompt("Password Required:"),
+  reconnect: () => {},
 };
 
 export default class VncDisplay {
-
   rfb = null;
   url;
   container;
@@ -27,11 +25,11 @@ export default class VncDisplay {
 
   constructor(options, target, url) {
     if (!url) {
-      throw new Error('Websocket Url is Required!');
+      throw new Error("Websocket Url is Required!");
     }
 
     if (!target) {
-      throw new Error('VNC Screen container is Required!');
+      throw new Error("VNC Screen container is Required!");
     }
 
     this.container = target;
@@ -55,38 +53,46 @@ export default class VncDisplay {
   };
 
   registerListener = () => {
-    window.addEventListener('resize', this._onWindowResize);
-    this.rfb.addEventListener('connect', () => {
-      console.info('Connected to remote VNC.');
+    window.addEventListener("resize", this._onWindowResize);
+    this.rfb.addEventListener("connect", () => {
+      console.info("Connected to remote VNC.");
     });
 
-    this.rfb.addEventListener('disconnect', () => {
-      console.info(`Disconnected from remote VNC, retrying in ${this.options.retryDuration / 1000} seconds.`);
+    this.rfb.addEventListener("disconnect", () => {
+      console.info(
+        `Disconnected from remote VNC, retrying in ${
+          this.options.retryDuration / 1000
+        } seconds.`
+      );
       if (this.options.retry) {
-        setTimeout(()=>{
+        setTimeout(() => {
           console.info(`send reconnect message!`);
           this.options.reconnect();
         }, this.options.retryDuration);
       }
     });
 
-    this.rfb.addEventListener('credentialsrequired', (e) => {
-      console.log('credentialsrequired:', e);
+    this.rfb.addEventListener("credentialsrequired", (e) => {
+      console.log("credentialsrequired:", e);
       console.log(this.options);
       if (this.options.onPasswordInput) {
-        this.options.onPasswordInput(this.url, "Password is needed or Password is incorrect!", (password) => {
-          this.rfb.sendCredentials({ password: password });
-        });
+        this.options.onPasswordInput(
+          this.url,
+          "Password is needed or Password is incorrect!",
+          (password) => {
+            this.rfb.sendCredentials({ password: password });
+          }
+        );
       }
     });
 
-    this.rfb.addEventListener('desktopname', (e) => {
+    this.rfb.addEventListener("desktopname", (e) => {
       console.info(`Desktop name is ${e.detail.name}`);
     });
   };
 
   removeAllListerners = () => {
-    window.removeEventListener('resize', this._onWindowResize);
+    window.removeEventListener("resize", this._onWindowResize);
   };
 
   // handleClick = () => {

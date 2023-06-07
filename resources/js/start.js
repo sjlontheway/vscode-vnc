@@ -2,7 +2,6 @@
 // It cannot access the main VS Code APIs directly.
 
 (function () {
-
   const CONNECTED = 0;
   const VNC_SERVER_DISCONNECT = 1;
   const VNC_SERVER_ERROR = 2;
@@ -13,10 +12,11 @@
   const RECONNECT = 7;
   const vscode = acquireVsCodeApi();
 
+  const container = /** @type {HTMLElement} */ (
+    document.getElementById("root")
+  );
 
-  const container = /** @type {HTMLElement} */ (document.getElementById('root'));
-
-  const statusEl = document.getElementById('title');
+  const statusEl = document.getElementById("title");
 
   let sendPasswordCallback;
 
@@ -28,7 +28,6 @@
 
   // send msg to host retry connect vnc server
   function reconnect() {
-    console.log('reconnect');
     vscode.postMessage({ type: RECONNECT });
   }
 
@@ -36,28 +35,28 @@
     return {
       scaleViewport: true,
       background: "#000000",
-      style: "padding:20px;",
+      style: "padding:0px;margin:0px",
       retry: true,
       retryDuration: 1000,
       reconnect: reconnect,
-      onPasswordInput: onCallPassword
+      onPasswordInput: onCallPassword,
     };
   }
 
   let display;
   // Handle messages sent from the extension to the webview
-  window.addEventListener('message', event => {
+  window.addEventListener("message", (event) => {
     const message = event.data; // The json data that the extension sent
-    console.log('message:', event);
-    let statusTitle = '';
+    console.log("message:", event);
+    let statusText = "";
     switch (message.type) {
       case CONNECTED:
-        statusTitle = 'Connecting to Vnc server....';
+        statusText = `Vnc server[${message.wsUrl}]`;
         vncPlay = new VncDisplay(getConnectConfig(), container, message.wsUrl);
         vncPlay.render();
         break;
       case VNC_SERVER_DISCONNECT:
-        statusTitle = 'Vnc server is Disconnected: ' + message.msg;
+        statusText = "Vnc server is Disconnected: " + message.msg;
         break;
       case VNC_PASSWORD:
         if (sendPasswordCallback) {
@@ -66,29 +65,27 @@
         break;
 
       case VNC_SERVER_ERROR:
-        statusTitle = 'Vnc server is error:' + message.msg;
-
+        statusText = "Vnc server is error:" + message.msg;
         break;
 
       case WEB_CLIENT_ERROR:
-        statusTitle = 'Vscode extension Connection error:' + message.msg;
+        statusText = "Vscode extension Connection error:" + message.msg;
         break;
 
       case WEB_CLIENT_DISCONNECT:
-        statusTitle = 'Vscode extension aborted connection!';
+        statusText = "Vscode extension aborted connection!";
         break;
 
       case TRANSFORM_ERROR:
-        statusTitle = 'Proxy Vnc Server data to Vscode extension error:' + message.msg;
+        statusText =
+          "Proxy Vnc Server data to Vscode extension error:" + message.msg;
         break;
-
     }
-    statusEl.innerText = statusTitle;
-
+    console.debug(statusText);
   });
-  window.addEventListener('unload', () => {
+  window.addEventListener("unload", () => {
     if (display) {
       display.disconnect();
     }
   });
-}());
+})();

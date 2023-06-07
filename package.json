@@ -2,7 +2,7 @@
   "name": "vnc-extension",
   "displayName": "vnc-extension",
   "description": "novnc vscode extension",
-  "version": "0.0.3",
+  "version": "0.0.5",
   "publisher": "king2021",
   "engines": {
     "vscode": "^1.59.0"
