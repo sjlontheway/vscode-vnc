@@ -1,10 +1,20 @@
-import { createConnection } from 'net';
-import { createServer as createHttpServer, IncomingMessage, RequestListener, Server, ServerResponse } from 'http';
-import { createServer as createHttpsServer, } from 'https';
-import * as fs from 'fs-extra';
-import WebSocket = require('ws');
-import { ChildProcessCode, ParentMessage, ChildProcessMessage, Message } from '../../message';
-
+import { createConnection } from "net";
+import {
+  createServer as createHttpServer,
+  IncomingMessage,
+  RequestListener,
+  Server,
+  ServerResponse,
+} from "http";
+import { createServer as createHttpsServer } from "https";
+import * as fs from "fs-extra";
+import WebSocket = require("ws");
+import {
+  ChildProcessCode,
+  ParentMessage,
+  ChildProcessMessage,
+  Message,
+} from "../../message";
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 const WebSocketServer = WebSocket.Server;
@@ -16,7 +26,6 @@ export interface ProxyOptions {
   keyFile?: string;
   certFile?: string;
 }
-
 
 // only upgrade websocket!
 const httpRequest: RequestListener = (request, response) => {
@@ -31,82 +40,104 @@ const errorHandler = (response: ServerResponse, code: number, msg: string) => {
   response.end();
 };
 
-const socketTransform = (client: WebSocket, targetAddress: string, targetPort: number) => {
-  console.log('socketTransform');
+const socketTransform = (
+  client: WebSocket,
+  targetAddress: string,
+  targetPort: number
+) => {
+  console.log("socketTransform");
   const target = createConnection(targetPort, targetAddress, function () {
-    console.log(`connected to remote host ${targetAddress}:${targetPort} target`);
+    console.log(
+      `connected to remote host ${targetAddress}:${targetPort} target`
+    );
   });
 
-  target.on('data', function (data) {
+  target.on("data", function (data) {
     try {
       client.send(data);
     } catch (e: any) {
       console.error("Client closed, cleaning up target", e);
       target.end();
-      sendMsgToParentProcess({ type: ChildProcessCode.TRANSFORM_ERROR, msg: e.message });
+      sendMsgToParentProcess({
+        type: ChildProcessCode.TRANSFORM_ERROR,
+        msg: e.message,
+      });
     }
   });
 
-  target.on('end', function () {
-    console.log('target disconnected');
+  target.on("end", function () {
+    console.log("target disconnected");
     client.close();
-    sendMsgToParentProcess({ type: ChildProcessCode.VNC_SERVER_DISCONNECT, msg: 'vnc server disconnect!' });
-  });
-
-  target.on('error', function (e) {
-    console.error('target connection error');
-    target.end();
-    client.close();
-    sendMsgToParentProcess({ type: ChildProcessCode.VNC_SERVER_ERROR, msg: e.message });
-
-  });
-
-  client.on('message', function (msg: Buffer) {
-    target.write(msg);
-  });
-
-  client.on('close', function (code, reason) {
-    console.log('WebSocket client disconnected: ' + code + ' [' + reason + ']');
-    target.end();
     sendMsgToParentProcess({
-      type: ChildProcessCode.WEB_CLIENT_DISCONNECT,
-      msg: `WebSocket client disconnected:${code}[${reason}]`
+      type: ChildProcessCode.VNC_SERVER_DISCONNECT,
+      msg: "vnc server disconnect!",
     });
   });
 
-  client.on('error', function (e) {
-    console.log('WebSocket client error: ' + e);
+  target.on("error", function (e) {
+    console.error("target connection error");
     target.end();
-    sendMsgToParentProcess({ type: ChildProcessCode.WEB_CLIENT_ERROR, msg: e.message });
+    client.close();
+    sendMsgToParentProcess({
+      type: ChildProcessCode.VNC_SERVER_ERROR,
+      msg: e.message,
+    });
   });
 
-};
+  client.on("message", function (msg: Buffer) {
+    target.write(msg);
+  });
 
+  client.on("close", function (code, reason) {
+    console.log("WebSocket client disconnected: " + code + " [" + reason + "]");
+    target.end();
+    sendMsgToParentProcess({
+      type: ChildProcessCode.WEB_CLIENT_DISCONNECT,
+      msg: `WebSocket client disconnected:${code}[${reason}]`,
+    });
+  });
+
+  client.on("error", function (e) {
+    console.log("WebSocket client error: " + e);
+    target.end();
+    sendMsgToParentProcess({
+      type: ChildProcessCode.WEB_CLIENT_ERROR,
+      msg: e.message,
+    });
+  });
+};
 
 export default function proxyRequest(options: ProxyOptions) {
   const { targetDomain, targetPort, sourcePort, keyFile, certFile } = options;
 
   let webServer: Server;
 
-  let wsProtol: string;
+  let wsProtocol: string;
 
   if (keyFile && certFile) {
     const key = fs.readFileSync(keyFile);
     const cert = fs.readdirSync(certFile);
     webServer = createHttpsServer({ cert, key }, httpRequest);
-    wsProtol = "wss://";
+    wsProtocol = "wss://";
   } else {
     webServer = createHttpServer(httpRequest);
-    wsProtol = "ws://";
+    wsProtocol = "ws://";
   }
 
   let wsServer;
   webServer.listen(sourcePort, () => {
     wsServer = new WebSocketServer({ server: webServer });
-    wsServer.on('connection', (socket: WebSocket) => socketTransform(socket, targetDomain, targetPort));
-    wsServer.on('error', e => console.log('wsserver error:', e));
-    wsServer.on('close', (...args) => console.log('close:reason', args));
-    sendMsgToParentProcess({ type: ChildProcessCode.CONNECTED, wsUrl: `${wsProtol}localhost:${sourcePort}` });
+    wsServer.on("connection", (socket: WebSocket) =>
+      socketTransform(socket, targetDomain, targetPort)
+    );
+    wsServer.on("error", (e) => console.log("Socket Server error:", e));
+    wsServer.on("close", (...args) =>
+      console.log("Socket Server close:reason", args)
+    );
+    sendMsgToParentProcess({
+      type: ChildProcessCode.CONNECTED,
+      wsUrl: `${wsProtocol}localhost:${sourcePort}`,
+    });
   });
 }
 
@@ -115,14 +146,14 @@ function exit() {
 }
 
 /**
- * 
+ *
  * @param message message from parent
  */
 function handleParentMessage(message: ParentMessage) {
-  console.log('handleParentMessage:', message);
+  console.log("handleParentMessage:", message);
   const type = message.type;
   switch (type) {
-    case 'exit':
+    case "exit":
       exit();
       break;
   }
@@ -133,17 +164,15 @@ function sendMsgToParentProcess(message: ChildProcessMessage) {
 }
 
 try {
-  const options: ProxyOptions = JSON.parse(process.env.options || '') as ProxyOptions;
-  process.title = 'vnc proxy process';
+  const options: ProxyOptions = JSON.parse(
+    process.env.options || ""
+  ) as ProxyOptions;
+  process.title = "vnc proxy process";
 
   proxyRequest(options);
-  process.on('message', handleParentMessage);
-
+  process.on("message", handleParentMessage);
 } catch (error) {
   if (process.send) {
     process.send({ error });
   }
 }
-
-
-

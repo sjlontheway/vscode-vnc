@@ -54,27 +54,17 @@ export default class VncDisplay {
 
   registerListener = () => {
     window.addEventListener("resize", this._onWindowResize);
-    this.rfb.addEventListener("connect", () => {
-      console.info("Connected to remote VNC.");
-    });
+    this.rfb.addEventListener("connect", () => {});
 
     this.rfb.addEventListener("disconnect", () => {
-      console.info(
-        `Disconnected from remote VNC, retrying in ${
-          this.options.retryDuration / 1000
-        } seconds.`
-      );
       if (this.options.retry) {
         setTimeout(() => {
-          console.info(`send reconnect message!`);
           this.options.reconnect();
         }, this.options.retryDuration);
       }
     });
 
     this.rfb.addEventListener("credentialsrequired", (e) => {
-      console.log("credentialsrequired:", e);
-      console.log(this.options);
       if (this.options.onPasswordInput) {
         this.options.onPasswordInput(
           this.url,
@@ -85,13 +75,9 @@ export default class VncDisplay {
         );
       }
     });
-
-    this.rfb.addEventListener("desktopname", (e) => {
-      console.info(`Desktop name is ${e.detail.name}`);
-    });
   };
 
-  removeAllListerners = () => {
+  removeAllListeners = () => {
     window.removeEventListener("resize", this._onWindowResize);
   };
 
@@ -120,6 +106,6 @@ export default class VncDisplay {
 
   unmount = () => {
     this.disconnect();
-    this.removeAllListerners();
+    this.removeAllListeners();
   };
 }
